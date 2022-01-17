@@ -23,33 +23,62 @@ class CatalogoLibrosXML() {
         }
 
     }
+    fun obtenerAtributosEnMapKV(e: Element ):MutableMap<String, String>
+    {
+        val mMap = mutableMapOf<String, String>()
+        for(j in 0..e.attributes.length - 1)
+            mMap.putIfAbsent(e.attributes.item(j).nodeName, e.attributes.item(j).nodeValue)
+        return mMap
+    }
+    fun obtenerNodosEnMapKV(e: Element ):MutableMap<String, String>
+    {
+        val mMap = mutableMapOf<String, String>()
+        for(j in 0..e.childNodes.length - 1)
+            mMap.putIfAbsent(e.childNodes.item(j).nodeName, e.childNodes.item(j).nodeValue)
+        return mMap
+    }
 
-    fun existeLibro(idLibro: String): Boolean {
+    fun obtenerListaNodosPorNombre( tagName: String): MutableList<Node>
+    {
         val xmlDoc: Document= readXml()!!
-        xmlDoc.documentElement.normalize()
-        val libros: NodeList = xmlDoc.getElementsByTagName("id")
+        val bookList: NodeList = xmlDoc.getElementsByTagName(tagName)
+        val lista = mutableListOf<Node>()
+        for(i in 0..bookList.length - 1)
+            lista.add(bookList.item(i))
+        return lista
+    }
+    fun existeLibro(idLibro: String): Boolean {
+
+        val libros = obtenerListaNodosPorNombre("book")
         var bol: Boolean= false
-        for (i in 0..libros.length - 1) {
-            var bookNode: Node= libros.item(i)
-            if (bookNode.toString() == idLibro) {
-                bol=true
+        var mMap:MutableMap<String, String> = mutableMapOf()
+        libros.forEach{
+            if (it.getNodeType() === Node.ELEMENT_NODE) {
+                val elem = it as Element
+                mMap = obtenerAtributosEnMapKV(it)
+
+                if(mMap.containsValue(idLibro)){
+                    bol=true
+                }
+                return bol
             }
         }
-        return bol
+        return mMap.containsValue(idLibro)
     }
 
     fun infoLibro (idLibro:String): Map<String, Any>? {
-        val mMap = mutableMapOf<String, Any>()
-        val xmlDoc: Document= readXml()!!
-        xmlDoc.documentElement.normalize()
-        val libros: NodeList = xmlDoc.getElementsByTagName("id")
-        for (i in 0..libros.length - 1) {
-            var bookNode: Node= libros.item(i)
-            if (bookNode.getNodeValue() == idLibro) {
-                var e: Node = libros.item(i)
-
-                for(j in 0..e.attributes.length - 1)
-                    mMap.putIfAbsent(e.attributes.item(j).nodeName, e.attributes.item(j).nodeValue)
+        val libros = obtenerListaNodosPorNombre("book")
+        var mMap:MutableMap<String, String> = mutableMapOf()
+        var mAtributos:MutableMap<String, String> = mutableMapOf()
+        var mNodos:MutableMap<String, String> = mutableMapOf()
+        libros.forEach{
+            if (it.getNodeType() === Node.ELEMENT_NODE) {
+                val elem = it as Element
+                mAtributos = obtenerAtributosEnMapKV(it)
+                mNodos= obtenerNodosEnMapKV(it)
+                if(mAtributos.containsValue(idLibro)){
+                    return mAtributos+mNodos
+                }
 
             }
         }
@@ -60,6 +89,6 @@ fun main() {
     var ruta= "C:\\Users\\juper\\OneDrive\\Escritorio\\2DAM\\LC\\Tema5\\catalog.xml"
     var xmlDoc = CatalogoLibrosXML(ruta)
     xmlDoc.existeLibro("bk101")
-
+    xmlDoc.infoLibro("bk101")
 
 }
