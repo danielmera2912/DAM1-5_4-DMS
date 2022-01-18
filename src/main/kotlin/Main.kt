@@ -34,7 +34,7 @@ class CatalogoLibrosXML() {
     {
         val mMap = mutableMapOf<String, String>()
         for(j in 0..e.childNodes.length - 1)
-            mMap.putIfAbsent(e.childNodes.item(j).nodeName, e.childNodes.item(j).nodeValue)
+            mMap.putIfAbsent(e.childNodes.item(j).nodeName, e.childNodes.item(j).textContent)
         return mMap
     }
 
@@ -86,7 +86,7 @@ class CatalogoLibrosXML() {
     }
 }
 fun main() {
-    var ruta= "C:\\Users\\juper\\OneDrive\\Escritorio\\2DAM\\LC\\Tema5\\catalog.xml"
+    var ruta= "catalog.xml"
     var xmlDoc = CatalogoLibrosXML(ruta)
     xmlDoc.existeLibro("bk101")
     xmlDoc.infoLibro("bk101")
